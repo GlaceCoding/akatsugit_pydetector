@@ -1,3 +1,7 @@
+local.yml
+intra_42.sqlite
+requirements.txt.lock
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
