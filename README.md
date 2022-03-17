@@ -1,4 +1,4 @@
-# aktasugit_pydetector
+# akatsugit_pydetector
 This is a personnal learning **fullstack** project to learn how to do datascience with python some data in an API REST. 
 
 **WARNING: DEV IN PROGRESS**
