@@ -2,12 +2,15 @@ import sys
 import requests
 import requests_cache
 import json
+import time
 
 from oauthlib.oauth2 import BackendApplicationClient
 from requests_oauthlib import OAuth2Session
 from requests.auth import HTTPBasicAuth
 
-requests_cache.install_cache('intra_42', backend='sqlite', expire_after=300)
+import srcs.app as app
+
+requests_cache.install_cache('intra_42', backend='sqlite', expire_after=1200)
 
 class Intra42:
 	client_id = None
@@ -19,9 +22,17 @@ class Intra42:
 		self.client_id = config['credentials']['cid']
 		self.client_secret = config['credentials']['secret']
 
-		self.refresh_token()
+		self.get_token()
 
-		self.test_request()
+		if not self.token or self.token['expires_at_localtime'] < time.time():
+			self.refresh_token()
+		else:
+			print('Token intra42 from cache')
+
+	def get_token(self):
+		token_json = app.database.get_variable('intra42_token')
+		if token_json:
+			self.token = json.loads(token_json)
 
 	def refresh_token(self):
 		auth = HTTPBasicAuth(self.client_id, self.client_secret)
@@ -29,50 +40,54 @@ class Intra42:
 		self.intra42 = OAuth2Session(client=client)
 		self.token = self.intra42.fetch_token(
 			token_url='https://api.intra.42.fr/oauth/token',
-			auth=auth
+			auth=auth, verify=True
 		)
-		#TODO: Expire system
+		self.token['expires_at_localtime'] = time.time() + self.token['expires_in'] - 10
+		app.database.set_variable('intra42_token', json.dumps(self.token))
 
-	def test_request(self):
+	def get_req(self, path, data=None):
 		headers = {'Authorization': 'Bearer ' + self.token['access_token']}
-		# 'https://api.intra.42.fr/v2/cursus/42/users',
-		# data={'campus_id':'41','filter[login]':'login'},
 
-		# 'https://api.intra.42.fr/v2/feedbacks',
-		# data={'campus_id':'41','per_page':'100',
-		# 'filter[user_id]':'97758','sort':'-created_at'},
-
-		# 'https://api.intra.42.fr/v2/users/97758/correction_point_historics',
-		# data={'campus_id':'41','per_page':'100'},
-
-		# 'https://api.intra.42.fr/v2/users/97758/projects_users',
-		# data={'campus_id':'41','per_page':'100'},
+		if not self.token or self.token['expires_at_localtime'] < time.time():
+			self.refresh_token()
 
 		req = requests.get(
-			'https://api.intra.42.fr/v2/users/97758/scale_teams/as_corrector',
-			data={'campus_id':'41','per_page':'100'}, # scale_teams/as_corrected  
-			headers=headers, verify=False
+			'https://api.intra.42.fr' + path,
+			data=data,
+			headers=headers, verify=True
 		)
 
-		if	req.status_code == 401:
+		if req.status_code == 401:
 			self.refresh_token()
 			sys.exit(1)
 
 		if req.status_code != 200:
-			print('Failed to obtain users', file=sys.stderr)
+			print('Failed to obtain', path, file=sys.stderr)
 			print(req.text)
 			sys.exit(1)
 
-		users = json.loads(req.text)
+		return req
 
-		#r = self.intra42.get('https://api.intra.42.fr/v2/cursus/42/users')
-		#! r n'a pas from_cache
-		#users = json.loads(r.content)
+	def get(self, path, data=None):
+		req = self.get_req(path, data)
 
-		#print(json.dumps(users, sort_keys=True, indent=4))
+		return json.loads(req.text)
 
-		for user in users:
-			if len(user['comment']) >= 180:
-				print(str(len(user['comment'])))
-		#	print(json.dumps(user, sort_keys=True, indent=4))
-		print(req.from_cache)
+	def get_all(self, path, data=None):
+		stack = None
+
+		page = 0
+		data['per_page'] = '100'
+
+		while True:
+			page += 1
+			data['page'] = page
+			obj = self.get(path, data)
+			if obj:
+				if stack is None:
+					stack = []
+				stack += obj
+
+			if len(obj) < 100:
+				return stack
+		return None
