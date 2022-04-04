@@ -10,7 +10,7 @@ from requests.auth import HTTPBasicAuth
 
 import srcs.app as app
 
-requests_cache.install_cache('intra_42', backend='sqlite', expire_after=1200)
+requests_cache.install_cache('intra_42', backend='sqlite', expire_after=7200)
 
 class Intra42:
 	client_id = None
