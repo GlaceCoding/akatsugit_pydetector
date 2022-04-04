@@ -95,9 +95,9 @@ def scoring(data, cursus):
 			if not login in score:
 				score[login] = [0, 0, 0]
 			score[login][1] += 1
-		if len(data['comment']) > 180:
+		if data['comment'] and len(data['comment']) > 180:
 			writersoule = writersoule + 1
-		if len(data['comment']) > 100:
+		if data['comment'] and len(data['comment']) > 100:
 			noobwriter = noobwriter + 1
 	else:
 		if not login in score:
@@ -113,8 +113,8 @@ def scoring(data, cursus):
 		})
 	score[login][2] += 1
 	#print(json.dumps(data, sort_keys=True, indent=4))
-	print(data['feedbacks'][0]['created_at'])
-	print(data['team']['closed_at'], data['team']['created_at'], data['team']['updated_at'], data['team']['locked_at'])
+	#print(data['feedbacks'][0]['created_at'])
+	#print(data['team']['closed_at'], data['team']['created_at'], data['team']['updated_at'], data['team']['locked_at'])
 	return True
 
 r = False
@@ -123,7 +123,7 @@ for data in stack:
 
 if first_register_libft != 0:
 	stack = intra42.get_all(
-		'/v2/users/97758/scale_teams/as_corrector',
+		'/v2/users/' + my_id + '/scale_teams/as_corrector',
 		data={'campus_id':'41','sort':'created_at'}, # scale_teams/as_corrector 
 	)
 
