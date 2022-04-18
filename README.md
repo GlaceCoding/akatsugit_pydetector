@@ -3,6 +3,10 @@ This is a personnal learning **fullstack** project to learn how to do datascienc
 
 **WARNING: DEV IN PROGRESS**
 
+Actually graph appear in CLI: (Next step will be to use Flask+ReactJS).
+
+<img src="https://user-images.githubusercontent.com/92152391/163854380-9a800a39-01a0-44e7-84f7-7fd7671db8e7.png" width="480" />
+
 ## Install
 
 Requires python3.1+, and pip.
