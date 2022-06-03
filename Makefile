@@ -10,7 +10,7 @@ install: requirements.txt.lock
 %.txt.lock: %.txt
 	@( \
 		source venv/bin/activate; \
-		pip install -r $<; \
+		pip3 install -r $<; \
 		cat $< > $@ \
 	)
 
