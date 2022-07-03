@@ -1,6 +1,8 @@
 # akatsugit_pydetector
 This is a personnal learning **fullstack** project to learn how to do datascience with python some data in an API REST. 
 
+**Archived project:** Matplotlib is nice to use but need to be server side, that why I will do math in clientside with JS. See: https://github.com/GlaceCoding/42iceberg
+
 **WARNING: DEV IN PROGRESS**
 
 Actually graph appear in CLI: (Next step will be to use Flask+ReactJS).
